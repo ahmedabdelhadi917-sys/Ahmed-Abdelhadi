@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public read-only leaderboard. Only trusted server code writes rankings.
+    match /leaderboard/{playerId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Player profiles: users can read/write only their own profile.
+    match /players/{playerId} {
+      allow read, create, update: if request.auth != null && request.auth.uid == playerId;
+      allow delete: if false;
+    }
+
+    // Quiz sessions and question bank are server-only.
+    match /quizSessions/{sessionId} {
+      allow read, write: if false;
+    }
+    match /questionBank/{questionId} {
+      allow read, write: if false;
+    }
+  }
+}
